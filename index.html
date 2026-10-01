@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Title/meta below are replaced from SITE in workshops/index.js at load time. -->
+  <title>Conference Program</title>
+  <meta name="description" content="Conference program: main conference, tutorials, and workshops in one schedule.">
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📅</text></svg>">
+  <script>
+    /* Set theme before paint: saved choice, else system preference. */
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem("theme"); } catch (e) {}
+      if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      document.documentElement.dataset.theme = t;
+    })();
+  </script>
+</head>
+<body>
+  <!-- Header/footer text is filled from window.SITE (workshops/index.js) by assets/app.js,
+       so adapting the page to a new conference means editing that one file. -->
+  <header class="site-header">
+    <div class="container">
+      <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle light/dark mode"></button>
+      <h1 id="siteTitle">Conference <span class="accent">Program</span></h1>
+      <script>
+        (function () {
+          var btn = document.getElementById("themeToggle"), root = document.documentElement;
+          function label() {
+            var dark = root.dataset.theme === "dark";
+            var text = document.createElement("span");
+            text.className = "theme-label";
+            text.textContent = dark ? " Light" : " Dark";
+            btn.replaceChildren(dark ? "☀️" : "🌙", text);
+          }
+          btn.addEventListener("click", function () {
+            root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+            try { localStorage.setItem("theme", root.dataset.theme); } catch (e) {}
+            label();
+          });
+          label();
+        })();
+      </script>
+      <p class="subtitle" id="siteSubtitle">…</p>
+    </div>
+  </header>
+
+  <nav class="toolbar">
+    <div class="container toolbar-inner">
+      <div class="seg" id="viewSwitch" role="tablist" aria-label="View">
+        <button data-view="schedule" class="is-active">Schedule</button>
+        <button data-view="workshops">Events</button>
+      </div>
+      <div class="seg" id="dayFilter" aria-label="Day">
+        <button data-day="all" class="is-active">All days</button>
+      </div>
+      <select id="workshopFilter" aria-label="Event"><option value="">All events</option></select>
+      <label class="check"><input type="checkbox" id="keynotesOnly"> Keynotes only</label>
+      <label class="check"><input type="checkbox" id="hideBreaks"> Hide breaks</label>
+      <input type="search" id="search" placeholder="Search speakers, titles, events…" aria-label="Search">
+    </div>
+  </nav>
+
+  <main class="container">
+    <p class="stats" id="stats"></p>
+    <div id="scheduleView"></div>
+    <div id="workshopsView" hidden></div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Data last collected: <span id="lastUpdated">—</span> · Times as published by each event (<span id="tz"></span>).</p>
+      <p id="sourcesLine"></p>
+    </div>
+  </footer>
+
+  <noscript><p class="container">This static page needs JavaScript to render the program data.</p></noscript>
+
+  <script>
+    /* Collect event files listed in workshops/index.js, then start the app.
+       Plain <script> injection keeps it working on GitHub Pages and file://. */
+    window.WORKSHOPS = [];
+    window.addWorkshop = function (w) { window.WORKSHOPS.push(w); };
+  </script>
+  <script src="workshops/index.js"></script>
+  <script>
+    (window.WORKSHOP_FILES || []).map(function (id) { return "workshops/" + id + ".js"; })
+      .concat("assets/app.js")
+      .forEach(function (src) {
+        var s = document.createElement("script");
+        s.src = src;
+        s.async = false; // execute in order; app.js runs last
+        s.onerror = function () { console.error("Failed to load " + src + " — check WORKSHOP_FILES in workshops/index.js"); };
+        document.body.appendChild(s);
+      });
+  </script>
+</body>
+</html>
